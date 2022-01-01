@@ -1,3 +1,5 @@
 node_modules
 worker.log
 .env
+code
+config.json

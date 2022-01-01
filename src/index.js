@@ -4,6 +4,8 @@ const fs = require("fs");
 const os = require("os");
 const osutils = require("os-utils");
 
+const pjson = require("../package.json");
+
 const logger = require("./logger");
 
 const { getS3File, uploadStringToS3, uploadFileToS3, downloadDirFromS3, downloadFileFromS3 } = require("./s3");
@@ -29,13 +31,13 @@ let status = STATUS.STOPPED;
   // Send status every 5 minutes
   setInterval(async () => {
     const { cpu, mem } = await getMemoryUsage();
-    uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, cpu, mem });
+    uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
     logger.info(`Status sent`);
   }, 5 * 60 * 1000);
 })();
 
 async function uploadLogs() {
-  await uploadFileToS3(`./worker.log`, `${HOSTNAME}/worker.log`);
+  await uploadFileToS3(`./logs/worker.log`, `${HOSTNAME}/worker.log`);
   logger.info(`Log sent`);
 }
 
@@ -92,7 +94,10 @@ async function upgradeIfNeeded() {
 
   const localConfiguration = await getLocalConfiguration();
 
-  if (localConfiguration && localConfiguration.date === remoteConfiguration.date) return logger.info("No need to upgrade");
+  if (localConfiguration && localConfiguration.date === remoteConfiguration.date) {
+    await start();
+    return logger.info("No need to upgrade");
+  }
 
   logger.info("Upgrading");
   await stop();

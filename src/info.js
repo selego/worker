@@ -18,11 +18,13 @@ const { listObjects, getS3File } = require("./s3");
   }
 
   if (action === "logs") {
+    if(!machine) return console.log("Please provide a machine name");
     const logs = await getLogs(machine);
     return console.log(logs);
   }
 
   if (action === "status") {
+    if(!machine) return console.log("Please provide a machine name");
     const status = await getStatus(machine);
     return console.log(status);
   }
