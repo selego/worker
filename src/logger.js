@@ -5,7 +5,7 @@ const myFormat = printf(({ level, message, timestamp }) => `${timestamp} ${level
 
 const logger = createLogger({
   format: combine(timestamp(), myFormat),
-  transports: [new transports.Console(), new transports.File({ filename: "./logs/worker.log", maxsize: 10000, maxFiles: 5, tailable: true })],
+  transports: [new transports.Console(), new transports.File({ filename: "./logs/worker.log", maxsize: 50000, maxFiles: 5, tailable: true })],
 });
 
 module.exports = logger;

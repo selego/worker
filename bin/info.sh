@@ -1,0 +1,1 @@
+node ./src/info.js

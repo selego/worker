@@ -1,5 +1,6 @@
 node_modules
-worker.log
+worker*.log
 .env
 code
 config.json
+.DS_Store

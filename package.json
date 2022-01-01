@@ -1,13 +1,19 @@
 {
   "name": "selego-worker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
     "deploy": "node ./src/deploy.js",
     "info": "node ./src/info.js"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "selego-worker-start": "./bin/start.sh",
+    "selego-worker-deploy": "./src/deploy.js",
+    "selego-worker-info": "./src/info.js"
   },
   "author": "SELEGO",
   "license": "ISC",
