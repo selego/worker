@@ -22,6 +22,9 @@ let child = null;
 let status = STATUS.STOPPED;
 
 (async () => {
+  // for new install, its faster
+  await uploadStatus();
+  
   await upgradeIfNeeded();
   await start();
 
@@ -32,16 +35,16 @@ let status = STATUS.STOPPED;
   setInterval(uploadLogs, 5 * 60 * 1000);
 
   // Send status every 5 minutes
-  setInterval(async () => {
-    const { cpu, mem } = await getMemoryUsage();
-    uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
-    logger.info(`Status sent`);
-  }, 5 * 60 * 1000);
+  setInterval(uploadStatus, 5 * 60 * 1000);
 })();
+
+async function uploadStatus() {
+  const { cpu, mem } = await getMemoryUsage();
+  uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
+}
 
 async function uploadLogs() {
   await uploadFileToS3(`./logs/worker.log`, `${HOSTNAME}/worker.log`);
-  logger.info(`Log sent`);
 }
 
 const getMemoryUsage = () => {
