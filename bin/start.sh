@@ -1,1 +1,1 @@
-node ./src/index.js $1 $2 $3 $4 $5 $6 $7 $8 $9
+node "/usr/local/lib/node_modules/selego-worker/src/index.js" $1 $2 $3 $4 $5 $6 $7 $8 $9

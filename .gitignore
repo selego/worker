@@ -4,3 +4,4 @@ worker*.log
 code
 config.json
 .DS_Store
+install.sh

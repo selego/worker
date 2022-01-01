@@ -21,6 +21,7 @@ let status = STATUS.STOPPED;
 
 (async () => {
   await upgradeIfNeeded();
+  await start();
 
   // Check update every 3 minutes
   setInterval(upgradeIfNeeded, 3 * 60 * 1000);
@@ -95,7 +96,6 @@ async function upgradeIfNeeded() {
   const localConfiguration = await getLocalConfiguration();
 
   if (localConfiguration && localConfiguration.date === remoteConfiguration.date) {
-    await start();
     return logger.info("No need to upgrade");
   }
 
