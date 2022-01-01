@@ -10,19 +10,19 @@ const { listObjects, getS3File } = require("./s3");
     const machines = await getAllMachines();
     for (let i = 0; i < machines.length; i++) {
       const status = await getStatus(machines[i]);
-      console.log(machines[i]);
-      console.log(`Status: ${status.date} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
-      // console.log(`Running: ${status.date} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
+      const configuration = await getConfiguration(machines[i]);
+      console.log("\x1b[33m", machines[i], "\x1b[0m", `(${status.version})`);
+      console.log(`-- Config: ${configuration.date} >> ${configuration.folder} >> ${configuration.name} >> ${configuration.from}`);
+      console.log(`-- Status: ${status.date} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
       console.log(`\r`);
     }
   }
 
   if (action === "logs") {
-    if(!machine) return console.log("Please provide a machine name");
+    if (!machine) return console.log("Please provide a machine name");
     const logs = await getLogs(machine);
     return console.log(logs);
   }
-
 })();
 
 async function getAllMachines() {
@@ -38,7 +38,7 @@ async function getLogs(machine) {
 
 async function getConfiguration(machine) {
   const r = await getS3File(`${machine}/config.json`);
-  if (!r) return `No Status for ${machine}`;
+  if (!r) return {};
   return JSON.parse(r.Body.toString("utf8"));
 }
 
