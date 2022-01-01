@@ -1,4 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({ path: `~/.selego-worker/.env` });
+require("dotenv").config({});
+
 const { spawn, execSync } = require("child_process");
 const fs = require("fs");
 const os = require("os");
