@@ -1,0 +1,26 @@
+{
+  "name": "worker",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/index.js",
+    "start": "node ./src/index.js",
+    "deploy": "node ./src/deploy.js",
+    "info": "node ./src/info.js"
+  },
+  "author": "SELEGO",
+  "license": "ISC",
+  "prettier": {
+    "printWidth": 180
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1048.0",
+    "dotenv": "^10.0.0",
+    "fs": "*",
+    "npm": "^8.3.0",
+    "os-utils": "^0.0.14",
+    "path": "^0.12.7",
+    "winston": "^3.3.3"
+  }
+}
