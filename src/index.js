@@ -72,7 +72,8 @@ async function start() {
   status = STATUS.RUNNING;
   child = spawn(`node`, [URLTOSCRIPT]);
   child.stdout.on("data", (e) => logger.info(e.toString().trim()));
-  child.on("error", (e) => logger.error(e.toString().trim()));
+  child.on("error", (e) => logger.error("Error child", e.toString().trim()));
+  child.on("close", (e) => logger.error("Close child", (e || "").toString().trim()));
 }
 
 async function getLocalConfiguration() {
