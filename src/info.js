@@ -1,3 +1,4 @@
+require("dotenv").config({ path: `~/.selego-worker/.env` });
 require("dotenv").config();
 
 const { listObjects, getS3File } = require("./s3");

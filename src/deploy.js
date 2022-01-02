@@ -1,3 +1,4 @@
+require("dotenv").config({ path: `~/.selego-worker/.env` });
 require("dotenv").config();
 const os = require("os");
 
