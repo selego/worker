@@ -14,7 +14,7 @@ const { listObjects, getS3File } = require("./s3");
       const configuration = await getConfiguration(machines[i]);
       console.log("\x1b[33m", machines[i], "\x1b[0m", `(${status.version})`);
       console.log(`-- Config: ${configuration.date} >> ${configuration.folder} >> ${configuration.name} >> ${configuration.from}`);
-      console.log(`-- Status: ${status.date} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
+      console.log(`-- Status: Last alive ${timeSince(new Date(status.date))} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
       console.log(`\r`);
     }
   }
@@ -26,6 +26,20 @@ const { listObjects, getS3File } = require("./s3");
   }
 })();
 
+function timeSince(date) {
+  var seconds = Math.floor((new Date() - date) / 1000);
+  var interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+  return Math.floor(seconds) + " seconds ago";
+}
 async function getAllMachines() {
   const arr = await listObjects({ Delimiter: "/" });
   return arr.CommonPrefixes.map((e) => e.Prefix.replace("/", "")).filter((e) => e);

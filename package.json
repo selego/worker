@@ -1,6 +1,6 @@
 {
   "name": "selego-worker",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "",
   "main": "./src/index.js",
   "scripts": {
@@ -11,9 +11,7 @@
   },
   "preferGlobal": true,
   "bin": {
-    "selego-worker-start": "./bin/start.sh",
-    "selego-worker-deploy": "./bin/deploy.sh",
-    "selego-worker-info": "./bin/info.sh"
+    "sw": "./bin/start.sh"
   },
   "author": "SELEGO",
   "license": "ISC",
