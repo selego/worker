@@ -21,10 +21,21 @@ const STATUS = { RUNNING: "RUNNING", STOPPED: "STOPPED" };
 let child = null;
 let status = STATUS.STOPPED;
 
+const getMemoryUsage = () => {
+  return new Promise((resolve, reject) => {
+    osutils.cpuUsage((cpu) => {
+      const mem = osutils.freememPercentage();
+      const obj = { mem: (mem * 100).toFixed(2), cpu: (cpu * 100).toFixed(2) };
+      logger.verbose(`Memory usage: ${obj.mem}% CPU usage: ${obj.cpu}%`);
+      resolve(obj);
+    });
+  });
+};
+
 (async () => {
   // for new install, its faster
   await uploadStatus();
-  
+
   await upgradeIfNeeded();
   await start();
 
@@ -46,17 +57,6 @@ async function uploadStatus() {
 async function uploadLogs() {
   await uploadFileToS3(`./logs/worker.log`, `${HOSTNAME}/worker.log`);
 }
-
-const getMemoryUsage = () => {
-  return new Promise((resolve, reject) => {
-    osutils.cpuUsage((cpu) => {
-      const mem = osutils.freememPercentage();
-      const obj = { mem: (mem * 100).toFixed(2), cpu: (cpu * 100).toFixed(2) };
-      logger.info(`Memory usage: ${obj.mem}% CPU usage: ${obj.cpu}%`);
-      resolve(obj);
-    });
-  });
-};
 
 async function stop() {
   logger.info(`Stoping script ${URLTOSCRIPT}`);
@@ -89,10 +89,8 @@ async function getRemoteConfiguration() {
 }
 
 async function upgradeIfNeeded() {
-  logger.info("#### Checking for upgrade");
-
+  logger.verbose("#### Checking for upgrade");
   const remoteConfiguration = await getRemoteConfiguration();
-  console.log("remoteConfiguration", remoteConfiguration);
   if (!remoteConfiguration) {
     logger.error("Doesn't have remote meta");
     return false;
@@ -101,7 +99,7 @@ async function upgradeIfNeeded() {
   const localConfiguration = await getLocalConfiguration();
 
   if (localConfiguration && localConfiguration.date === remoteConfiguration.date) {
-    return logger.info("No need to upgrade");
+    return logger.verbose("No need to upgrade");
   }
 
   logger.info("Upgrading");

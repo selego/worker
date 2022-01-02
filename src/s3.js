@@ -13,7 +13,7 @@ async function uploadFileToS3(fromPathLocal, toPathS3) {
   const params = { Bucket: CELLAR_BUCKET_NAME, Key: toPathS3, Body: fs.readFileSync(fromPathLocal) };
   s3.putObject(params, function (err, data) {
     if (err) return logger.error(err);
-    logger.info("Successfully uploaded " + fromPathLocal + " to " + `${CELLAR_BUCKET_NAME}/${toPathS3}`);
+    logger.verbose("Successfully uploaded " + fromPathLocal + " to " + `${CELLAR_BUCKET_NAME}/${toPathS3}`);
   });
 }
 
