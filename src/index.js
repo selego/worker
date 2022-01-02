@@ -1,9 +1,11 @@
-require("dotenv").config({ path: `~/.selego-worker/.env` });
+const HOMEDIR = require("os").homedir();
+const HOSTNAME = require("os").hostname();
+
+require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
 
 const { spawn, execSync } = require("child_process");
 const fs = require("fs");
-const os = require("os");
 const osutils = require("os-utils");
 
 const pjson = require("../package.json");
@@ -12,8 +14,7 @@ const logger = require("./logger");
 
 const { getS3File, uploadStringToS3, uploadFileToS3, downloadDirFromS3, downloadFileFromS3 } = require("./s3");
 
-const HOSTNAME = os.hostname();
-const WORKING_FOLDER = `../worker`;
+const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
 const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
 
 const STATUS = { RUNNING: "RUNNING", STOPPED: "STOPPED" };
