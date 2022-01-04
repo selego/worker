@@ -34,6 +34,7 @@ const getMemoryUsage = () => {
 };
 
 (async () => {
+  logger.info(`Worker version ${pjson.version} started on ${HOSTNAME}`);
   // for new install, its faster
   await uploadStatus();
 
