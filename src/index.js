@@ -96,7 +96,7 @@ async function getRemoteConfiguration() {
 async function upgradeIfNeeded() {
   logger.verbose("#### Checking for upgrade");
   const remoteConfiguration = await getRemoteConfiguration();
-  if (!remoteConfiguration) return logger.error("Doesn't have remote meta");
+  if (!remoteConfiguration) return logger.error(`Doesn't have remote meta here ${HOSTNAME}/config.json`);
 
   const localConfiguration = await getLocalConfiguration();
   if (localConfiguration && localConfiguration.date === remoteConfiguration.date) return logger.verbose("No need to upgrade");
