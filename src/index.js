@@ -53,11 +53,11 @@ const getMemoryUsage = () => {
 
 async function uploadStatus() {
   const { cpu, mem } = await getMemoryUsage();
-  uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
+  await uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
 }
 
 async function uploadLogs() {
-  await uploadFileToS3(`./logs/worker.log`, `${HOSTNAME}/worker.log`);
+  await uploadFileToS3(`${WORKING_FOLDER}/logs/worker.log`, `${HOSTNAME}/worker.log`);
 }
 
 async function stop() {

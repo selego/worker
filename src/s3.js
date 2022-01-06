@@ -69,6 +69,7 @@ function getS3File(name) {
 async function uploadStringToS3(key, content) {
   return new Promise((resolve, reject) => {
     s3.putObject({ Bucket: CELLAR_BUCKET_NAME, Key: key, Body: JSON.stringify(content), ContentType: "application/json" }, function (err, data) {
+      if (err) logger(err);
       resolve();
     });
   });
