@@ -109,7 +109,9 @@ async function upgradeIfNeeded() {
 
   logger.info("Upgrading");
   await stop();
-  await fs.rmdirSync(`${WORKING_FOLDER}/code`, { recursive: true });
+
+  if (fs.existsSync(`${WORKING_FOLDER}/code`)) await fs.rmdirSync(`${WORKING_FOLDER}/code`, { recursive: true });
+  
   await downloadDirFromS3(`${HOSTNAME}/code`, `${WORKING_FOLDER}/code`);
   logger.info("Start npm install");
   execSync("npm install", { cwd: `${WORKING_FOLDER}/code` });
