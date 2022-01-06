@@ -1,6 +1,9 @@
 const HOMEDIR = require("os").homedir();
+
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
-require("dotenv").config();
+require("dotenv").config({ path: `/home/pi/.selego-worker/.env` });
+require("dotenv").config({});
+
 
 const { listObjects, getS3File } = require("./s3");
 
