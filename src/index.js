@@ -1,7 +1,8 @@
-const HOMEDIR = require("os").homedir();
+const HOSTNAME = require("os").hostname();
+
+let HOMEDIR = require("os").homedir();
 if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
 
-const HOSTNAME = require("os").hostname();
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
 
