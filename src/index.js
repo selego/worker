@@ -1,8 +1,11 @@
 const HOMEDIR = require("os").homedir();
 const HOSTNAME = require("os").hostname();
 
+console.log(`Reading ${HOMEDIR}/.selego-worker/.env`)
+
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
+
 const { spawn, execSync } = require("child_process");
 const fs = require("fs");
 const osutils = require("os-utils");
@@ -16,6 +19,7 @@ const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
 const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
 
 const { CELLAR_BUCKET_NAME } = require("./config");
+
 if (!CELLAR_BUCKET_NAME) logger.error(`No env loaded from ${HOMEDIR}/.selego-worker/.env`);
 
 const STATUS = { RUNNING: "RUNNING", STOPPED: "STOPPED" };
@@ -54,6 +58,7 @@ const getMemoryUsage = () => {
 
 async function uploadStatus() {
   const { cpu, mem } = await getMemoryUsage();
+
   await uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
 }
 

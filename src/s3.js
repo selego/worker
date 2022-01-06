@@ -1,5 +1,8 @@
 const AWS = require("aws-sdk");
 const path = require("path");
+
+
+
 const logger = require("./logger");
 const fs = require("fs");
 
@@ -70,6 +73,8 @@ function getS3File(name) {
 }
 
 async function uploadStringToS3(key, content) {
+  logger.info("CELLAR_BUCKET_NAME", CELLAR_BUCKET_NAME);
+
   return new Promise((resolve, reject) => {
     s3.putObject({ Bucket: CELLAR_BUCKET_NAME, Key: key, Body: JSON.stringify(content), ContentType: "application/json" }, function (err, data) {
       if (err) logger.error(err);
