@@ -1,4 +1,5 @@
-const HOMEDIR = require("os").homedir();
+let HOMEDIR = require("os").homedir();
+if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
 const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
 
 const { createLogger, format, transports } = require("winston");
