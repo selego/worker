@@ -1,4 +1,6 @@
 const HOMEDIR = require("os").homedir();
+console.log(`Reading ${HOMEDIR}/.selego-worker/.env`)
+
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config();
 const os = require("os");
