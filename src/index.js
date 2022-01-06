@@ -2,6 +2,7 @@ const HOSTNAME = require("os").hostname();
 
 let HOMEDIR = require("os").homedir();
 if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
+console.log("LOADING ENV", `${HOMEDIR}/.selego-worker/.env`);
 
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
@@ -111,7 +112,7 @@ async function upgradeIfNeeded() {
   await stop();
 
   if (fs.existsSync(`${WORKING_FOLDER}/code`)) await fs.rmdirSync(`${WORKING_FOLDER}/code`, { recursive: true });
-  
+
   await downloadDirFromS3(`${HOSTNAME}/code`, `${WORKING_FOLDER}/code`);
   logger.info("Start npm install");
   execSync("npm install", { cwd: `${WORKING_FOLDER}/code` });
