@@ -1,8 +1,8 @@
 const HOMEDIR = require("os").homedir();
-const HOSTNAME = require("os").hostname();
+if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
 
+const HOSTNAME = require("os").hostname();
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
-require("dotenv").config({ path: `/home/pi/.selego-worker/.env` });
 require("dotenv").config({});
 
 const { spawn, execSync } = require("child_process");

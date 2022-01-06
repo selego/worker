@@ -1,9 +1,7 @@
-const HOMEDIR = require("os").homedir();
-
+let HOMEDIR = require("os").homedir();
+if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
-require("dotenv").config({ path: `/home/pi/.selego-worker/.env` });
 require("dotenv").config({});
-
 
 const { listObjects, getS3File } = require("./s3");
 
@@ -27,8 +25,6 @@ const { listObjects, getS3File } = require("./s3");
     console.log(`\r`);
   }
 })();
-
-
 
 function timeSince(date) {
   var seconds = Math.floor((new Date() - date) / 1000);
