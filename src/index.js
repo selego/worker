@@ -1,7 +1,9 @@
 const HOMEDIR = require("os").homedir();
 const HOSTNAME = require("os").hostname();
+const USERNAME = require("os").userInfo().username;
 
-console.log(`Reading ${HOMEDIR}/.selego-worker/.env`)
+console.log("USERNAME", USERNAME);
+console.log(`Reading ${HOMEDIR}/.selego-worker/.env`);
 
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
