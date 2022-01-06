@@ -59,7 +59,10 @@ function getS3File(name) {
   const p = new Promise((resolve, reject) => {
     const params = { Bucket: CELLAR_BUCKET_NAME, Key: name };
     s3.getObject(params, (err, data) => {
-      if (err) return resolve(null);
+      if (err) {
+        logger.error(err);
+        return resolve(null);
+      }
       resolve(data);
     });
   });
@@ -69,7 +72,7 @@ function getS3File(name) {
 async function uploadStringToS3(key, content) {
   return new Promise((resolve, reject) => {
     s3.putObject({ Bucket: CELLAR_BUCKET_NAME, Key: key, Body: JSON.stringify(content), ContentType: "application/json" }, function (err, data) {
-      if (err) logger(err);
+      if (err) logger.error(err);
       resolve();
     });
   });
