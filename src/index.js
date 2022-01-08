@@ -14,7 +14,7 @@ const osutils = require("os-utils");
 const pjson = require("../package.json");
 const logger = require("./logger");
 
-const { getS3File, uploadStringToS3, uploadFileToS3, downloadDirFromS3, downloadFileFromS3 } = require("./s3");
+const { getS3File, uploadStringToS3, uploadFileToS3, downloadDirFromS3, downloadFileFromS3, deleteDir } = require("./s3");
 
 const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
 const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
