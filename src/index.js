@@ -7,7 +7,7 @@ console.log("LOADING ENV", `${HOMEDIR}/.selego-worker/.env`);
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
 
-const { spawn, execSync } = require("child_process");
+const { spawn, execSync, spawnSync } = require("child_process");
 const fs = require("fs");
 const osutils = require("os-utils");
 
@@ -20,6 +20,8 @@ const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
 const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
 
 const { CELLAR_BUCKET_NAME } = require("./config");
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 if (!CELLAR_BUCKET_NAME) logger.error(`No env loaded from ${HOMEDIR}/.selego-worker/.env`);
 
@@ -68,10 +70,12 @@ async function uploadLogs() {
 }
 
 async function stop() {
+  status = STATUS.STOPPED;
   logger.info(`Stoping script ${URLTOSCRIPT}`);
   if (!child) return;
   child.stdin.pause();
   child.kill("SIGINT");
+  await sleep(5000);
   child = null;
 }
 
@@ -79,11 +83,26 @@ async function start() {
   if (child) await stop();
   logger.info(`Starting script ${URLTOSCRIPT}`);
   status = STATUS.RUNNING;
-  child = spawn(`node`, [URLTOSCRIPT]);
-  child.stdout.on("data", (e) => logger.info(e.toString().trim()));
+  //, { shell: true }
+  child = await spawn(`node`, [URLTOSCRIPT]);
+  // console.log("child", child.stderr.toString());
+  child.stdout.on("data", (e) => {
+    logger.info(e.toString().trim());
+  });
   child.on("error", (e) => logger.error("Error child", e.toString().trim()));
-  child.on("close", (e) => logger.error("Close child", (e || "").toString().trim()));
-  child.on("exit", (e) => logger.error("Exit child", (e || "").toString().trim()));
+  child.on("close", (e, f) => {
+    logger.error("Close child", (e || "").toString().trim());
+  });
+  child.on("exit", (e, f) => {
+    const error = child.stderr.read();
+    if (error) logger.error(error.toString());
+    logger.error("Exit child", (e || "").toString().trim());
+    // if (status === STATUS.RUNNING) {
+    //   logger.error("Exit child with a crash !!!, restarting");
+    //   start();
+    // }
+  });
+
   child.on("disconnect", (e) => logger.error("Disconnect child", (e || "").toString().trim()));
 }
 

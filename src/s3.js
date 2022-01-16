@@ -19,11 +19,13 @@ async function uploadFileToS3(fromPathLocal, toPathS3) {
 }
 
 async function uploadDirToS3(localPath, to) {
-  localPath = localPath.replace(/\/$/, "");
+  localPath = path.resolve(localPath);
   function walkSync(currentDirPath, callback) {
     fs.readdirSync(currentDirPath).forEach(function (name) {
-      if (["node_modules"].includes(name)) return;
+      if (["node_modules",".git"].includes(name)) return;
+
       var filePath = path.join(currentDirPath, name);
+
       var stat = fs.statSync(filePath);
       if (stat.isFile()) {
         callback(filePath, stat);
