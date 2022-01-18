@@ -20,10 +20,14 @@ const { listObjects, getS3File } = require("./s3");
   for (let i = 0; i < machines.length; i++) {
     const status = await getStatus(machines[i]);
     const configuration = await getConfiguration(machines[i]);
+    const logs = await getLogs(machines[i]);
     console.log("\x1b[33m", machines[i], "\x1b[0m", `(${status.version})`);
     console.log(`-- Config: ${configuration.date} >> ${configuration.folder} >> ${configuration.name} >> ${configuration.from}`);
     console.log(`-- Status: Last alive ${timeSince(new Date(status.date))} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
-    console.log(`\r`);
+    console.log(`-- Logs:\r`);
+    console.log(`${logs.substr(-400)}`);
+    
+    console.log(`\r\r`);
   }
 })();
 
@@ -55,6 +59,7 @@ async function getConfiguration(machine) {
   if (!r) return {};
   return JSON.parse(r.Body.toString("utf8"));
 }
+
 async function getStatus(machine) {
   const r = await getS3File(`${machine}/status.json`);
   if (!r) return `No Status for ${machine}`;
