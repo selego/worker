@@ -14,7 +14,6 @@ module.exports = {
   APP_URL,
   ENVIRONMENT,
   SENDINBLUE_API_KEY,
-  GITHUB_TOKEN,
 };
 
 function getEnvironment() {

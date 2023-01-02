@@ -1,11 +1,12 @@
 const HOSTNAME = require("os").hostname();
-
 let HOMEDIR = require("os").homedir();
 if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
 console.log("LOADING ENV", `${HOMEDIR}/.selego-worker/.env`);
 
 require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
 require("dotenv").config({});
+
+const URL = "https://sw.cleverapps.io";
 
 const { spawn, execSync, spawnSync } = require("child_process");
 const fs = require("fs");

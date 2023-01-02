@@ -12,7 +12,6 @@ const app = express();
 
 const origin = [APP_URL, "https://join.le-stud.com"];
 
-console.log("origin", origin);
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,7 +23,7 @@ app.use("/user", require("./controllers/user"));
 app.use("/device", require("./controllers/device"));
 
 app.get("/", async (req, res) => {
-  res.status(200).send("COUCOU " + d.toLocaleString());
+  res.status(200).send("COUCOU ");
 });
 
 require("./passport")(app);
