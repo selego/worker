@@ -1,33 +1,40 @@
-let HOMEDIR = require("os").homedir();
-if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
+const { HOSTNAME } = require("./config");
+const fs = require("fs");
 
-require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
-require("dotenv").config({});
-
-const os = require("os");
-
-const { uploadDirToS3, uploadStringToS3, deleteDir, getS3File } = require("./s3");
+const logger = require("./logger");
+const { uploadDirToS3 } = require("./utils");
+const api = require("./api");
+const { signin } = require("./auth");
 
 (async () => {
+  await signin();
+
   const folder = process.argv[2];
   const machine = process.argv[3];
-  const name = getName();
+  const description = getDescription();
 
   console.log(`Uploading : ${folder} on ${machine}`);
 
-  const r = await getS3File(`${machine}/status.json`);
-  if (!r) return console.log(`Machine ${machine} doesnt exist`);
-
   if (!folder) return console.log("No folder specified");
   if (!machine) return console.log("No machine specified");
-  if (!name) return console.log("Please add a message");
+  if (!description) return console.log("Please add a description");
 
-  await deleteDir(`${machine}/code`);
-  await uploadDirToS3(folder, `${machine}/code`);
-  await uploadStringToS3(`${machine}/config.json`, { date: new Date(), folder, name, from: os.hostname() });
+  const { data } = await api.get(`/device/${machine}`);
+  if (!data) return console.log("Machine not found");
+
+  await api.post(`/device/deletecode/${machine}`);
+  console.log(`Code delete on ${machine}`);
+
+  await uploadDirToS3(folder, async (e) => {
+    var buffer = fs.readFileSync(e);
+    await api.post(`/device/upload/${machine}`, { buffer, path: e });
+    console.log("Successfully uploaded " + e);
+  });
+  await api.post(`/device/${machine}`, { date: new Date(), description, folder, from: HOSTNAME });
+  return;
 })();
 
-function getName() {
+function getDescription() {
   let str = "";
   for (let i = 4; i < process.argv.length || 20; i++) {
     if (!process.argv[i]) return str;

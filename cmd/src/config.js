@@ -1,11 +1,17 @@
-const CELLAR_ADDON_HOST = process.env.CELLAR_ADDON_HOST;
-const CELLAR_ADDON_KEY_ID = process.env.CELLAR_ADDON_KEY_ID;
-const CELLAR_ADDON_KEY_SECRET = process.env.CELLAR_ADDON_KEY_SECRET;
-const CELLAR_BUCKET_NAME = process.env.CELLAR_BUCKET_NAME;
+let HOMEDIR = require("os").homedir();
+if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
+
+const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
+const LOG_PATH = `${WORKING_FOLDER}/logs/worker.log`;
+const TOKEN_PATH = `${WORKING_FOLDER}/token.txt`;
+const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
+const HOSTNAME = require("os").hostname();
 
 module.exports = {
-  CELLAR_BUCKET_NAME,
-  CELLAR_ADDON_KEY_SECRET,
-  CELLAR_ADDON_KEY_ID,
-  CELLAR_ADDON_HOST,
+  LOG_PATH,
+  WORKING_FOLDER,
+  HOMEDIR,
+  TOKEN_PATH,
+  URLTOSCRIPT,
+  HOSTNAME,
 };

@@ -1,32 +1,28 @@
-let HOMEDIR = require("os").homedir();
-if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
-
-require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
-require("dotenv").config({});
-
-const { listObjects, getS3File } = require("./s3");
+const { signin } = require("./auth");
+const api = require("./api");
 
 (async () => {
+  
+  await signin();
+
   const action = process.argv[2];
   const machine = process.argv[3] || "";
 
   if (action === "logs") {
     if (!machine) return console.log("Please provide a machine name");
-    const logs = await getLogs(machine);
-    return console.log(logs);
+    const device = await api.get(`/device/${machine}`);
+    return console.log(device.logs);
   }
 
-  const machines = await getAllMachines();
-  for (let i = 0; i < machines.length; i++) {
-    const status = await getStatus(machines[i]);
-    const configuration = await getConfiguration(machines[i]);
-    const logs = await getLogs(machines[i]);
-    console.log("\x1b[33m", machines[i], "\x1b[0m", `(${status.version})`);
-    console.log(`-- Config: ${configuration.date} >> ${configuration.folder} >> ${configuration.name} >> ${configuration.from}`);
-    console.log(`-- Status: Last alive ${timeSince(new Date(status.date))} || CPU: ${status.cpu}% || MEM: ${status.mem}%`);
+  const { data: devices } = await api.get(`/device`);
+
+  for (let i = 0; i < devices.length; i++) {
+    const device = devices[i];
+    console.log("\x1b[33m", device.name, "\x1b[0m", `(${device.version})`);
+    console.log(`-- Config: ${device.date} >> ${device.folder} >> ${device.description} >> ${device.from}`);
+    console.log(`-- Status: Last alive ${timeSince(new Date(device.date))} || CPU: ${device.cpu}% || MEM: ${device.mem}%`);
     console.log(`-- Logs:\r`);
-    console.log(`${logs.substr(-400)}`);
-    
+    console.log(`${(device.logs || "").substr(-400)}`);
     console.log(`\r\r`);
   }
 })();
@@ -44,24 +40,4 @@ function timeSince(date) {
   interval = seconds / 60;
   if (interval > 1) return Math.floor(interval) + " minutes ago";
   return Math.floor(seconds) + " seconds ago";
-}
-async function getAllMachines() {
-  const arr = await listObjects({ Delimiter: "/" });
-  return arr.CommonPrefixes.map((e) => e.Prefix.replace("/", "")).filter((e) => e);
-}
-async function getLogs(machine) {
-  const r = await getS3File(`${machine}/worker.log`);
-  if (!r) return `No logs for ${machine}`;
-  return r.Body.toString("utf8");
-}
-async function getConfiguration(machine) {
-  const r = await getS3File(`${machine}/config.json`);
-  if (!r) return {};
-  return JSON.parse(r.Body.toString("utf8"));
-}
-
-async function getStatus(machine) {
-  const r = await getS3File(`${machine}/status.json`);
-  if (!r) return `No Status for ${machine}`;
-  return JSON.parse(r.Body.toString("utf8"));
 }

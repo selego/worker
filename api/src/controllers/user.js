@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const router = express.Router();
 
@@ -13,36 +14,35 @@ const USER_ALREADY_REGISTERED = "USER_ALREADY_REGISTERED";
 const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const EMAIL_AND_PASSWORD_REQUIRED = "EMAIL_AND_PASSWORD_REQUIRED";
-const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
-const JWT_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
+
+const JWT_MAX_AGE = 1000 * 60 * 60 * 24 * 365; // 1 year
+
+// (async () => {
+//   const arr = await UserObject.find();
+//   // await UserObject.deleteMany({});
+//   console.log("arr", arr);
+//   // await UserObject.create({ name: "Seb", email: "se.legoff@gmail.com", password: "Coucou2&" });
+// })();
 
 router.post("/signin", async (req, res) => {
   let { password, email } = req.body;
+
   email = (email || "").trim().toLowerCase();
 
+  console.log("LA", req.body);
   if (!email || !password) return res.status(400).send({ ok: false, code: EMAIL_AND_PASSWORD_REQUIRED });
 
   try {
-    const user = await this.model.findOne({ email });
+    const user = await UserObject.findOne({ email });
     if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
-
-    const match = true; //await user.comparePassword(password);
+    const match = await user.comparePassword(password);
     if (!match) return res.status(401).send({ ok: false, code: EMAIL_OR_PASSWORD_INVALID });
     user.set({ last_login_at: Date.now() });
     await user.save();
-
-    let cookieOptions = { maxAge: COOKIE_MAX_AGE, httpOnly: true };
-    if (config.ENVIRONMENT === "development") {
-      cookieOptions = { ...cookieOptions, secure: false, domain: "localhost", sameSite: "Lax" };
-    } else {
-      cookieOptions = { ...cookieOptions, secure: true, domain: ".selego.co", sameSite: "Lax" };
-    }
-
-    const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
-    res.cookie("jwt", token, cookieOptions);
-
+    const token = jwt.sign({ _id: user.id }, config.SECRET, { expiresIn: JWT_MAX_AGE });
     return res.status(200).send({ ok: true, token, user });
   } catch (error) {
+    console.log("error", error);
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }
 });
@@ -54,30 +54,13 @@ router.post("/logout", async (req, res) => {
     return res.status(500).send({ ok: false, error });
   }
 });
-router.post("/signup", async (req, res) => {
-  try {
-    const { password, email, name } = req.body;
 
-    if (password && !validatePassword(password)) return res.status(200).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
-
-    const user = await this.model.create({ name, password, email });
-    const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
-    const opts = { maxAge: COOKIE_MAX_AGE, secure: config.ENVIRONMENT === "development" ? false : true, httpOnly: false };
-    res.cookie("jwt", token, opts);
-
-    return res.status(200).send({ user, token, ok: true });
-  } catch (error) {
-    console.log("e", error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
-  }
-});
 router.get("/signin_token", passport.authenticate("user", { session: false }), async (req, res) => {
   try {
     const { user } = req;
     user.set({ last_login_at: Date.now() });
     const u = await user.save();
-    return res.status(200).send({ user, token: req.cookies.jwt, ok: true });
+    return res.status(200).send({ user, ok: true });
   } catch (error) {
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }

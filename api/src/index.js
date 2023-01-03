@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
@@ -10,10 +11,12 @@ const { PORT, APP_URL } = require("./config.js");
 
 const app = express();
 
-const origin = [APP_URL, "https://join.le-stud.com"];
+const origin = [APP_URL];
 
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json({ limit: "50mb" }));
+
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 

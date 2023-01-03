@@ -1,30 +1,19 @@
-const HOSTNAME = require("os").hostname();
-let HOMEDIR = require("os").homedir();
-if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
-console.log("LOADING ENV", `${HOMEDIR}/.selego-worker/.env`);
-
-require("dotenv").config({ path: `${HOMEDIR}/.selego-worker/.env` });
-require("dotenv").config({});
-
-const URL = "https://sw.cleverapps.io";
+const { HOSTNAME, WORKING_FOLDER, URLTOSCRIPT, LOG_PATH } = require("./config");
 
 const { spawn, execSync, spawnSync } = require("child_process");
 const fs = require("fs");
 const osutils = require("os-utils");
+const path = require("path");
+
+const { getFile } = require("./utils");
 
 const pjson = require("../package.json");
 const logger = require("./logger");
+const api = require("./api");
 
-const { getS3File, uploadStringToS3, uploadFileToS3, downloadDirFromS3, downloadFileFromS3, deleteDir } = require("./s3");
-
-const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
-const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
-
-const { CELLAR_BUCKET_NAME } = require("./config");
+const { signin } = require("./auth");
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-if (!CELLAR_BUCKET_NAME) logger.error(`No env loaded from ${HOMEDIR}/.selego-worker/.env`);
 
 const STATUS = { RUNNING: "RUNNING", STOPPED: "STOPPED" };
 
@@ -42,13 +31,20 @@ const getMemoryUsage = () => {
   });
 };
 
+//npm run deploy ./ Sebs-MacBook-Pro.local test
+
 (async () => {
   logger.info(`Worker version ${pjson.version} started on ${HOSTNAME}`);
-  // for new install, its faster
-  await uploadStatus();
 
+  const s = await signin();
+  if (!s) return;
+
+  console.log("SIGNIN OK");
+
+  // for new install, its faster
+  await uploadStatus(); //ok
   await upgradeIfNeeded();
-  await start();
+  // await start();
 
   // Check update every 3 minutes
   setInterval(upgradeIfNeeded, 3 * 60 * 1000);
@@ -62,13 +58,14 @@ const getMemoryUsage = () => {
 
 async function uploadStatus() {
   const { cpu, mem } = await getMemoryUsage();
-
-  await uploadStringToS3(`${HOSTNAME}/status.json`, { date: new Date(), status, version: pjson.version, cpu, mem });
+  await api.post(`/device/${HOSTNAME}`, { ping: new Date(), status, version: pjson.version, cpu, mem });
 }
 
-async function uploadLogs() {
-  await uploadFileToS3(`${WORKING_FOLDER}/logs/worker.log`, `${HOSTNAME}/worker.log`);
-}
+const uploadLogs = async () => {
+  const logs = fs.readFileSync(LOG_PATH).toString();
+  if (!logs) return;
+  return await api.post(`/device/${HOSTNAME}`, { logs });
+};
 
 async function stop() {
   status = STATUS.STOPPED;
@@ -107,37 +104,36 @@ async function start() {
   child.on("disconnect", (e) => logger.error("Disconnect child", (e || "").toString().trim()));
 }
 
-async function getLocalConfiguration() {
-  const exist = fs.existsSync(`${WORKING_FOLDER}/config.json`);
-  if (!exist) return null;
-  const localConfiguration = fs.readFileSync(`${WORKING_FOLDER}/config.json`);
-  return JSON.parse(localConfiguration.toString("utf8"));
-}
-
-async function getRemoteConfiguration() {
-  const r = await getS3File(`${HOSTNAME}/config.json`);
-  if (!r) return null;
-  return JSON.parse(r.Body.toString("utf8"));
-}
-
 async function upgradeIfNeeded() {
   logger.verbose("#### Checking for upgrade");
-  const remoteConfiguration = await getRemoteConfiguration();
-  if (!remoteConfiguration) return logger.error(`Doesn't have remote meta here ${HOSTNAME}/config.json`);
+  const { data: device } = await api.get(`/device/${HOSTNAME}`);
+  if (!device.date) return logger.error(`Doesn't have remote meta here ${HOSTNAME}`);
 
-  const localConfiguration = await getLocalConfiguration();
-  if (localConfiguration && localConfiguration.date === remoteConfiguration.date) return logger.verbose("No need to upgrade");
+  const localConfiguration = JSON.parse(await getFile(`${WORKING_FOLDER}/config.json`));
+
+  // if (localConfiguration && localConfiguration.date === device.date) return logger.verbose("No need to upgrade");
 
   logger.info("Upgrading");
   await stop();
 
   if (fs.existsSync(`${WORKING_FOLDER}/code`)) await fs.rmdirSync(`${WORKING_FOLDER}/code`, { recursive: true });
 
+  const { data: files } = await api.get(`/device/files/${HOSTNAME}`);
+  for (const file of files) {
+    logger.info(`Downloading ${file}`);
+    const { data } = await api.get(`/device/file/${HOSTNAME}?key=${file}`);
+    const dir = path.dirname(`${WORKING_FOLDER}/code/${file}`);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    await fs.writeFileSync(`${WORKING_FOLDER}/code/${file}`, Buffer.from(data.Body));
+  }
+
   await downloadDirFromS3(`${HOSTNAME}/code`, `${WORKING_FOLDER}/code`);
   logger.info("Start npm install");
+
   execSync("npm install", { cwd: `${WORKING_FOLDER}/code` });
   logger.info("End npm install");
-  await downloadFileFromS3(`${HOSTNAME}/config.json`, `${WORKING_FOLDER}/config.json`);
+
+  await fs.writeFileSync(`${WORKING_FOLDER}/config.json`, JSON.stringify({ date: device.date }));
   await uploadLogs();
   await start();
 }
