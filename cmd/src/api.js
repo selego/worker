@@ -29,6 +29,12 @@ class api {
     console.log("data", data);
     return data;
   }
+
+  async delete(url) {
+    const res = await fetch(`${URL}${url}`, { method: "DELETE", headers: { JWT: this.token, "Content-Type": "application/json" } });
+    const data = await res.json();
+    return data;
+  }
 }
 
 const n = new api();
