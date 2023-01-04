@@ -2,12 +2,12 @@ NPMPATH=`npm config get prefix`
 
 if [ -z "$1" ]
 then
-echo "Please type \ 
-sw start to run the worker locally, \
-sw info to get a visibility on what's going on\
-sw deploy %directory %nameofmachine %comment \
-sw version \
-sw delete"
+printf "Please type
+- 'sw start' to run the worker locally,
+- 'sw info' to get a visibility on what's going on
+- 'sw deploy' %directory %nameofmachine %comment
+- 'sw version'
+- 'sw delete'"
  exit 1
 fi
 

@@ -11,6 +11,7 @@ function getToken(req) {
   return token;
 }
 
+
 module.exports = function (app) {
   const opts = {};
   opts.jwtFromRequest = getToken;
