@@ -110,8 +110,7 @@ async function upgradeIfNeeded() {
   if (!device.date) return logger.error(`Doesn't have remote meta here ${HOSTNAME}`);
 
   const localConfiguration = JSON.parse(await getFile(`${WORKING_FOLDER}/config.json`));
-
-  // if (localConfiguration && localConfiguration.date === device.date) return logger.verbose("No need to upgrade");
+  if (localConfiguration && localConfiguration.date === device.date) return logger.verbose("No need to upgrade");
 
   logger.info("Upgrading");
   await stop();
