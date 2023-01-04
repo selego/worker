@@ -11,6 +11,7 @@ router.get("/files/:name", passport.authenticate(["user"], { session: false }), 
   try {
     let list = await listAllObjects(`code/${req.params.name}`);
     list = list.map((item) => item.Key.replace(`code/${req.params.name}/`, ""));
+    console.log(list)
     res.status(200).send({ ok: true, data: list });
   } catch (error) {
     console.log(error);
