@@ -48,6 +48,7 @@ async function uploadDirToS3(localPath, to) {
 
 const listAllObjects = async (Prefix) => {
   // repeatedly calling AWS list objects because it only returns 1000 objects
+  console.log("CELLAR_BUCKET_NAME", CELLAR_BUCKET_NAME);
   let list = [];
   let shouldContinue = true;
   let nextContinuationToken = null;
