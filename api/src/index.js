@@ -13,6 +13,7 @@ const app = express();
 
 const origin = [APP_URL];
 
+
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json({ limit: "50mb" }));
 
