@@ -118,7 +118,6 @@ async function upgradeIfNeeded() {
   if (fs.existsSync(`${WORKING_FOLDER}/code`)) await fs.rmdirSync(`${WORKING_FOLDER}/code`, { recursive: true });
 
   const { data: files } = await api.get(`/device/files/${HOSTNAME}`);
-  console.log("files", files);
   for (const file of files) {
     logger.info(`Downloading ${file}`);
     const { data } = await api.get(`/device/file/${HOSTNAME}?key=${file}`);
@@ -127,7 +126,6 @@ async function upgradeIfNeeded() {
     await fs.writeFileSync(`${WORKING_FOLDER}/code/${file}`, Buffer.from(data.Body));
   }
 
-  await downloadDirFromS3(`${HOSTNAME}/code`, `${WORKING_FOLDER}/code`);
   logger.info("Start npm install");
 
   execSync("npm install", { cwd: `${WORKING_FOLDER}/code` });

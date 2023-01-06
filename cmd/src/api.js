@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-let dev = true;
+let dev = false;
 const URL = dev ? "http://localhost:8080" : "https://sw.cleverapps.io";
 
 class api {

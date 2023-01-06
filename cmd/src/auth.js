@@ -1,6 +1,7 @@
 const { TOKEN_PATH, HOSTNAME } = require("./config");
 
 const fs = require("fs");
+const readline = require("readline");
 
 const { getFile } = require("./utils");
 const api = require("./api");
@@ -36,6 +37,7 @@ async function signin() {
 
 async function question(str) {
   return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     rl.question(str, async (yo) => {
       resolve(yo);
     });
