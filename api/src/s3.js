@@ -100,7 +100,6 @@ function uploadToS3FromBuffer(path, buffer, ContentType) {
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
     s3.upload(params, function (err, data) {
-      console.log("success", data);
       if (err) {
         console.log("error", err);
         return reject(`error in callback:${err}`);

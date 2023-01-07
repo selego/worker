@@ -1,10 +1,9 @@
-
 const api = require("./api");
-const { signin } = require("./auth");
+const { signinUser } = require("./auth");
 
 (async () => {
-  await signin();
+  await signinUser();
   const machine = process.argv[2];
-  await api.delete(`/device/${machine}`);
+  await api.deleteUser(`/device/${machine}`);
   console.log("Successfully deleted " + machine);
 })();

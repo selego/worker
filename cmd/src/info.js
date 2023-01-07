@@ -1,26 +1,25 @@
-const { signin } = require("./auth");
+const { signinUser } = require("./auth");
 const api = require("./api");
 
 (async () => {
-  
-  await signin();
+  await signinUser();
 
   const action = process.argv[2];
   const machine = process.argv[3] || "";
 
   if (action === "logs") {
     if (!machine) return console.log("Please provide a machine name");
-    const device = await api.get(`/device/${machine}`);
+    const device = await api.getUser(`/device/${machine}`);
     return console.log(device.logs);
   }
 
-  const { data: devices } = await api.get(`/device`);
+  const { data: devices } = await api.getUser(`/device`);
 
   for (let i = 0; i < devices.length; i++) {
     const device = devices[i];
-    console.log("\x1b[33m", device.name, "\x1b[0m", `(${device.version})`);
+    console.log("\x1b[33m", device.name, "\x1b[0m", `${device._id}`, `(${device.version})`);
     console.log(`-- Config: ${device.date} >> ${device.folder} >> ${device.description} >> ${device.from}`);
-    console.log(`-- Status: Last alive ${timeSince(new Date(device.date))} || CPU: ${device.cpu}% || MEM: ${device.mem}%`);
+    console.log(`-- Status: Last alive ${timeSince(new Date(device.ping))} || CPU: ${device.cpu}% || MEM: ${device.mem}%`);
     console.log(`-- Logs:\r`);
     console.log(`${(device.logs || "").substr(-400)}`);
     console.log(`\r\r`);

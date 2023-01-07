@@ -1,4 +1,5 @@
 const { HOSTNAME, WORKING_FOLDER, URLTOSCRIPT, LOG_PATH } = require("./config");
+const DATE_PATH = `${WORKING_FOLDER}/date.txt`;
 
 const { spawn, execSync, spawnSync } = require("child_process");
 const fs = require("fs");
@@ -11,7 +12,7 @@ const pjson = require("../package.json");
 const logger = require("./logger");
 const api = require("./api");
 
-const { signin } = require("./auth");
+const { signinDevice } = require("./auth");
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -31,18 +32,13 @@ const getMemoryUsage = () => {
   });
 };
 
-//npm run deploy ./ Sebs-MacBook-Pro.local test
-
 (async () => {
   logger.info(`Worker version ${pjson.version} started on ${HOSTNAME}`);
 
-  const s = await signin();
-  if (!s) return;
+  await signinDevice();
 
-  console.log("SIGNIN OK");
-
-  // for new install, its faster
   await uploadStatus(); //ok
+
   await upgradeIfNeeded();
   // await start();
 
@@ -58,13 +54,13 @@ const getMemoryUsage = () => {
 
 async function uploadStatus() {
   const { cpu, mem } = await getMemoryUsage();
-  await api.post(`/device/${HOSTNAME}`, { ping: new Date(), status, version: pjson.version, cpu, mem });
+  await api.putDevice(`/device`, { ping: new Date(), status, version: pjson.version, cpu, mem });
 }
 
 const uploadLogs = async () => {
   const logs = fs.readFileSync(LOG_PATH).toString();
   if (!logs) return;
-  return await api.post(`/device/${HOSTNAME}`, { logs });
+  return await api.putDevice(`/device`, { logs });
 };
 
 async function stop() {
@@ -106,22 +102,22 @@ async function start() {
 
 async function upgradeIfNeeded() {
   logger.verbose("#### Checking for upgrade");
-  const { data: device } = await api.get(`/device/${HOSTNAME}`);
-  if (!device.date) return logger.error(`Doesn't have remote meta here ${HOSTNAME}`);
+  const { data: remoteDate } = await api.getDevice(`/device/date`);
+  if (!remoteDate) return logger.error(`Doesn't have remote meta here ${HOSTNAME}`);
 
-  const localConfiguration = JSON.parse(await getFile(`${WORKING_FOLDER}/config.json`));
-  if (localConfiguration && localConfiguration.date === device.date) return logger.verbose("No need to upgrade");
+  const localDate = await getFile(DATE_PATH);
+  if (localDate && localDate === remoteDate) return logger.verbose("No need to upgrade");
 
   logger.info("Upgrading");
   await stop();
 
   if (fs.existsSync(`${WORKING_FOLDER}/code`)) await fs.rmdirSync(`${WORKING_FOLDER}/code`, { recursive: true });
 
-  const res = await api.get(`/device/files/${HOSTNAME}`);
-  console.log(res);
-  for (const file of res.files) {
+  const res = await api.getDevice(`/device/files`);
+
+  for (const file of res.data) {
     logger.info(`Downloading ${file}`);
-    const { data } = await api.get(`/device/file/${HOSTNAME}?key=${file}`);
+    const { data } = await api.getDevice(`/device/file?key=${file}`);
     const dir = path.dirname(`${WORKING_FOLDER}/code/${file}`);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     await fs.writeFileSync(`${WORKING_FOLDER}/code/${file}`, Buffer.from(data.Body));
@@ -132,7 +128,8 @@ async function upgradeIfNeeded() {
   execSync("npm install", { cwd: `${WORKING_FOLDER}/code` });
   logger.info("End npm install");
 
-  await fs.writeFileSync(`${WORKING_FOLDER}/config.json`, JSON.stringify({ date: device.date }));
+  fs.writeFileSync(DATE_PATH, remoteDate);
+
   await uploadLogs();
   await start();
 }

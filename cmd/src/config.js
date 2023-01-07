@@ -3,15 +3,17 @@ if (HOMEDIR == "/root") HOMEDIR = "/home/pi";
 
 const WORKING_FOLDER = `${HOMEDIR}/.selego-worker/worker`;
 const LOG_PATH = `${WORKING_FOLDER}/logs/worker.log`;
-const TOKEN_PATH = `${WORKING_FOLDER}/token.txt`;
+
 const URLTOSCRIPT = `${WORKING_FOLDER}/code/src/index.js`;
 const HOSTNAME = require("os").hostname();
+
+const SERVER = true ? "http://localhost:8080" : "https://sw.cleverapps.io";
 
 module.exports = {
   LOG_PATH,
   WORKING_FOLDER,
   HOMEDIR,
-  TOKEN_PATH,
   URLTOSCRIPT,
   HOSTNAME,
+  SERVER,
 };

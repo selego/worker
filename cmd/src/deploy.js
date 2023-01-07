@@ -4,35 +4,37 @@ const fs = require("fs");
 const logger = require("./logger");
 const { uploadDirToS3 } = require("./utils");
 const api = require("./api");
-const { signin } = require("./auth");
+const { signinUser } = require("./auth");
 
 (async () => {
-  await signin();
+  await signinUser();
 
   const folder = process.argv[2];
-  const machine = process.argv[3];
+  const name = process.argv[3];
   const description = getDescription();
 
-  console.log(`Uploading : ${folder} on ${machine}`);
+  console.log(`Uploading : ${folder} on ${name}`);
 
   if (!folder) return console.log("No folder specified");
-  if (!machine) return console.log("No machine specified");
+  if (!name) return console.log("No machine specified");
   if (!description) return console.log("Please add a description");
 
-  const { data } = await api.get(`/device/${machine}`);
-  if (!data) return console.log("Machine not found");
-
-  await api.post(`/device/deletecode/${machine}`);
-  console.log(`Code delete on ${machine}`);
+  const { code } = await api.postUser(`/device/deletecode/${name}`);
+  if (code) return console.log("Error deleting code :" + code);
+  console.log(`Code delete on ${name}`);
 
   await uploadDirToS3(folder, async (e) => {
     var buffer = fs.readFileSync(e);
-    await api.post(`/device/upload/${machine}`, { buffer, path: e });
+    await api.postUser(`/device/upload/${name}`, { buffer, path: e });
     console.log("Successfully uploaded " + e);
   });
-  await api.post(`/device/${machine}`, { date: new Date(), description, folder, from: HOSTNAME });
+  await api.postUser(`/device/update/${name}`, { date: new Date(), description, folder, from: HOSTNAME });
   return;
 })();
+
+
+
+//
 
 function getDescription() {
   let str = "";

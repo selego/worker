@@ -1,12 +1,13 @@
 {
   "name": "selego-worker",
-  "version": "0.2.6",
+  "version": "0.2.10",
   "description": "",
   "main": "./src/index.js",
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
     "version": "node ./src/version.js",
+    "delete": "node ./src/delete.js",
     "deploy": "node ./src/deploy.js",
     "info": "node ./src/info.js"
   },

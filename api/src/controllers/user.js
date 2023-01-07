@@ -29,7 +29,6 @@ router.post("/signin", async (req, res) => {
 
   email = (email || "").trim().toLowerCase();
 
-  console.log("LA", req.body);
   if (!email || !password) return res.status(400).send({ ok: false, code: EMAIL_AND_PASSWORD_REQUIRED });
 
   try {
@@ -39,13 +38,15 @@ router.post("/signin", async (req, res) => {
     if (!match) return res.status(401).send({ ok: false, code: EMAIL_OR_PASSWORD_INVALID });
     user.set({ last_login_at: Date.now() });
     await user.save();
-    const token = jwt.sign({ _id: user.id }, config.SECRET, { expiresIn: JWT_MAX_AGE });
+    const token = jwt.sign({ _id: user._id }, config.SECRET, { expiresIn: JWT_MAX_AGE });
     return res.status(200).send({ ok: true, token, user });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }
 });
+
+
 router.post("/logout", async (req, res) => {
   try {
     res.clearCookie("jwt");

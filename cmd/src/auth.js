@@ -1,4 +1,6 @@
-const { TOKEN_PATH, HOSTNAME } = require("./config");
+const { WORKING_FOLDER, HOSTNAME } = require("./config");
+const TOKEN_PATH = `${WORKING_FOLDER}/token.txt`;
+const TOKEN_DEVICE_PATH = `${WORKING_FOLDER}/token_device.txt`;
 
 const fs = require("fs");
 const readline = require("readline");
@@ -6,24 +8,53 @@ const readline = require("readline");
 const { getFile } = require("./utils");
 const api = require("./api");
 
-async function signin() {
+async function signinUser() {
   return new Promise(async (resolve, reject) => {
     try {
       {
         const token = await getFile(TOKEN_PATH);
         if (token) {
-          api.setToken(token);
-          const data = await api.get(`/user/signin_token`);
+          api.setUserToken(token);
+          const data = await api.getUser(`/user/signin_token`);
           if (data.ok) return resolve(true);
         }
       }
       {
         const email = await question("Email ? ");
         const password = await question("Password ? ");
-        const data = await api.post(`/user/signin`, { email, password });
+        const data = await api.postUser(`/user/signin`, { email, password });
         if (data.token) {
-          api.setToken(data.token);
+          api.setUserToken(data.token);
           fs.writeFileSync(TOKEN_PATH, data.token);
+          resolve(true);
+        }
+      }
+    } catch (e) {
+      console.log("e", e);
+      resolve(false);
+    }
+  });
+  return false;
+}
+async function signinDevice() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      {
+        const token = await getFile(TOKEN_DEVICE_PATH);
+        if (token) {
+          api.setDeviceToken(token);
+          try {
+            const data = await api.getDevice(`/device/signin_token`);
+            if (data.ok) return resolve(true);
+          } catch (e) {}
+        }
+      }
+      {
+        console.log("Create a new device");
+        const { data } = await api.postDevice(`/device/create`, { name: HOSTNAME, hostname: HOSTNAME });
+        if (data.token) {
+          api.setDeviceToken(data.token);
+          fs.writeFileSync(TOKEN_DEVICE_PATH, data.token);
           resolve(true);
         }
       }
@@ -44,4 +75,4 @@ async function question(str) {
   });
 }
 
-module.exports = { signin };
+module.exports = { signinUser, signinDevice };

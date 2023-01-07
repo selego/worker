@@ -1,39 +1,53 @@
 const fetch = require("node-fetch");
 
-let dev = false;
-const URL = dev ? "http://localhost:8080" : "https://sw.cleverapps.io";
+const { SERVER } = require("./config");
 
 class api {
   constructor() {
     this.token = null;
   }
 
-  setToken(token) {
-    this.token = token;
+  setUserToken(token) {
+    this.userToken = token;
   }
 
-  async get(url) {
-    const res = await fetch(`${URL}${url}`, { method: "GET", headers: { JWT: this.token, "Content-Type": "application/json" } });
-    const data = await res.json();
-    return data;
+  setDeviceToken(token) {
+    this.deviceToken = token;
   }
 
-  async post(url, body) {
-    const res = await fetch(`${URL}${url}`, { method: "POST", body: JSON.stringify(body), headers: { JWT: this.token, "Content-Type": "application/json" } });
-    const data = await res.json();
-    return data;
-  }
-  async put(url, body) {
-    const res = await fetch(`${URL}${url}`, { method: "PUT", body: JSON.stringify(body), headers: { JWT: this.token, "Content-Type": "application/json" } });
-    const data = await res.json();
-    console.log("data", data);
-    return data;
+  async getDevice(url) {
+    const res = await fetch(`${SERVER}${url}`, { method: "GET", headers: { JWT: this.deviceToken, "Content-Type": "application/json" } });
+    return await res.json();
   }
 
-  async delete(url) {
-    const res = await fetch(`${URL}${url}`, { method: "DELETE", headers: { JWT: this.token, "Content-Type": "application/json" } });
-    const data = await res.json();
-    return data;
+  async postDevice(url, body) {
+    const res = await fetch(`${SERVER}${url}`, { method: "POST", body: JSON.stringify(body), headers: { JWT: this.deviceToken, "Content-Type": "application/json" } });
+    return await res.json();
+  }
+
+  async putDevice(url, body) {
+    const res = await fetch(`${SERVER}${url}`, { method: "PUT", body: JSON.stringify(body), headers: { JWT: this.deviceToken, "Content-Type": "application/json" } });
+    return await res.json();
+  }
+
+  async getUser(url) {
+    const res = await fetch(`${SERVER}${url}`, { method: "GET", headers: { JWT: this.userToken, "Content-Type": "application/json" } });
+    return await res.json();
+  }
+
+  async postUser(url, body) {
+    const res = await fetch(`${SERVER}${url}`, { method: "POST", body: JSON.stringify(body), headers: { JWT: this.userToken, "Content-Type": "application/json" } });
+    return await res.json();
+  }
+
+  async putUser(url, body) {
+    const res = await fetch(`${SERVER}${url}`, { method: "PUT", body: JSON.stringify(body), headers: { JWT: this.userToken, "Content-Type": "application/json" } });
+    return await res.json();
+  }
+
+  async deleteUser(url, body) {
+    const res = await fetch(`${SERVER}${url}`, { method: "DELETE", body: JSON.stringify(body), headers: { JWT: this.userToken, "Content-Type": "application/json" } });
+    return await res.json();
   }
 }
 
