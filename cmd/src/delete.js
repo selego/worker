@@ -3,7 +3,7 @@ const { signinUser } = require("./auth");
 
 (async () => {
   await signinUser();
-  const machine = process.argv[2];
-  await api.deleteUser(`/device/${machine}`);
-  console.log("Successfully deleted " + machine);
+  const id = process.argv[2];
+  await api.deleteUser(`/device/${id}`);
+  console.log("Successfully deleted " + id);
 })();

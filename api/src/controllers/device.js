@@ -151,9 +151,9 @@ router.get("/", passport.authenticate(["user"], { session: false }), async (req,
   }
 });
 
-router.delete("/:name", passport.authenticate(["user"], { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate(["user"], { session: false }), async (req, res) => {
   try {
-    await DeviceObject.findOneAndDelete({ name: req.params.name });
+    await DeviceObject.findByIdAndDelete(req.params.id);
     res.status(200).send({ ok: true });
   } catch (error) {
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
