@@ -133,14 +133,14 @@ router.get("/date", passport.authenticate(["device"], { session: false }), async
   }
 });
 
-router.get("/:name", passport.authenticate(["user"], { session: false }), async (req, res) => {
-  try {
-    const data = await DeviceObject.findOne({ name: req.params.name });
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
-  }
-});
+// router.get("/:name", passport.authenticate(["user"], { session: false }), async (req, res) => {
+//   try {
+//     const data = await DeviceObject.findOne({ name: req.params.name });
+//     return res.status(200).send({ ok: true, data });
+//   } catch (error) {
+//     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+//   }
+// });
 
 router.get("/", passport.authenticate(["user"], { session: false }), async (req, res) => {
   try {
