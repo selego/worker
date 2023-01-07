@@ -103,7 +103,7 @@ async function start() {
 async function upgradeIfNeeded() {
   logger.verbose("#### Checking for upgrade");
   const { data: remoteDate } = await api.getDevice(`/device/date`);
-  if (!remoteDate) return logger.error(`Doesn't have remote meta here ${HOSTNAME}`);
+  if (!remoteDate) return logger.error(`Nothing to do for ${HOSTNAME}`);
 
   const localDate = await getFile(DATE_PATH);
   if (localDate && localDate === remoteDate) return logger.verbose("No need to upgrade");
