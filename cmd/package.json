@@ -1,6 +1,6 @@
 {
   "name": "selego-worker",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "",
   "main": "./src/index.js",
   "scripts": {
@@ -30,6 +30,7 @@
     "npm": "^8.3.0",
     "os-utils": "^0.0.14",
     "path": "^0.12.7",
+    "selego-worker": "^0.2.13",
     "winston": "^3.3.3"
   }
 }
