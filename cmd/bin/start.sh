@@ -32,6 +32,13 @@ node "$NPMPATH/lib/node_modules/selego-worker/src/deploy.js" $2 $3 $4 $5 $6 $7 $
  exit 1
 fi
 
+if [ $1 = "log" ]
+then
+echo "Run log"
+node "$NPMPATH/lib/node_modules/selego-worker/src/log.js" $2 $3 $4 $5 $6 $7 $8 $9
+ exit 1
+fi
+
 if [ $1 = "version" ]
 then
 echo "Run version"
